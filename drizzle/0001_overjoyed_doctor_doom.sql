@@ -1,0 +1,21 @@
+CREATE TABLE `user_profiles` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`user_id` int NOT NULL,
+	`future_self` text NOT NULL,
+	`goals` text NOT NULL,
+	`values` text NOT NULL,
+	`tired_pattern` text NOT NULL,
+	`overwhelm_signals` text NOT NULL,
+	`spiral_time` varchar(20) NOT NULL,
+	`personality_mode` varchar(20) NOT NULL DEFAULT 'adaptive',
+	`communication_style` varchar(20) NOT NULL,
+	`call_out_preference` varchar(20) NOT NULL,
+	`comfort_style` text NOT NULL,
+	`grounding_methods` text NOT NULL,
+	`guidance_example` text,
+	`quiz_data` text,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `user_profiles_id` PRIMARY KEY(`id`),
+	CONSTRAINT `user_profiles_user_id_unique` UNIQUE(`user_id`)
+);
