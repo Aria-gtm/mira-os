@@ -15,7 +15,7 @@ interface Message {
 }
 
 export default function MiraOS() {
-  const { state, setCapacity, setAnchors, setVisionLine, setShutdown, manualOverridePhase, isLoading: stateLoading } = useMira();
+  const { state, setCapacity, setAnchors, setVisionLine, setShutdown, manualOverridePhase, isLoading } = useMira();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -26,6 +26,19 @@ export default function MiraOS() {
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // CRITICAL FIX: Prevent "Flash of Untruth" (Gemini Patch 2)
+  // Show loading screen until OS state is confirmed from database
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+          <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-xs font-serif tracking-[0.2em] text-muted-foreground">INITIALIZING MIRA CORE...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Voice chat mutation
   const voiceChatMutation = trpc.mira.voiceChat.useMutation({

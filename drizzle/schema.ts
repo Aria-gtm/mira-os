@@ -53,6 +53,7 @@ export const userProfiles = mysqlTable("user_profiles", {
   supportIntensity: mysqlEnum("support_intensity", ["quiet", "light", "close"]).default("light").notNull(),
   nudgeTolerance: mysqlEnum("nudge_tolerance", ["low", "medium", "high"]).default("medium").notNull(),
   verbosity: mysqlEnum("verbosity", ["short", "standard", "detailed"]).default("standard").notNull(),
+  timezone: varchar("timezone", { length: 50 }).default("UTC").notNull(), // User's timezone for accurate phase detection
   
   // Context
   guidanceExample: text("guidance_example"), // Example of moment they wish someone guided them better

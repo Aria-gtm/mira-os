@@ -67,10 +67,12 @@ export function MiraProvider({ children }: { children: React.ReactNode }) {
   };
 
   // 4. THE TIMEKEEPER (Auto-Sync Phase based on Local Time)
+  // Uses browser's local time (timezone-aware by default)
   useEffect(() => {
     if (!dbState) return; // Wait for initial data
 
     const syncPhaseToTime = () => {
+      // Get user's local hour (automatically timezone-aware)
       const hour = new Date().getHours();
       let calculatedPhase: MiraPhase = "FOCUS";
 
@@ -82,7 +84,7 @@ export function MiraProvider({ children }: { children: React.ReactNode }) {
       
       // If the DB says something different than the Clock, force an update
       if (dbState.currentPhase !== calculatedPhase) {
-        console.log(`[Mira OS] Shifting Phase: ${dbState.currentPhase} → ${calculatedPhase}`);
+        console.log(`[Mira OS] Shifting Phase: ${dbState.currentPhase} → ${calculatedPhase} (Local Hour: ${hour})`);
         updateMutation.mutate({ phase: calculatedPhase });
       }
     };
@@ -92,7 +94,24 @@ export function MiraProvider({ children }: { children: React.ReactNode }) {
 
     // Then check every minute
     const interval = setInterval(syncPhaseToTime, 60000);
-    return () => clearInterval(interval);
+    
+    // CRITICAL FIX: Handle sleep/wake (Gemini Patch 1)
+    // When laptop sleeps and wakes, or tab becomes visible again,
+    // force immediate refresh to prevent stale phase display
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("[Mira OS] Waking up - forcing state refresh");
+        utils.mira.getOSState.invalidate(); // Force DB refresh
+        syncPhaseToTime(); // Force phase check
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [dbState?.currentPhase]);
 
   // 5. CONTEXT VALUE

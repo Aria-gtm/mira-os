@@ -176,10 +176,13 @@ export const miraRouter = router({
       const userId = ctx.user.id;
 
       // 1. FETCH ALL CONTEXT
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+      
       const [stateData, profileData, goalsData] = await Promise.all([
         db.select().from(userState).where(eq(userState.userId, userId)).limit(1),
         db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1),
-        db.select().from(dailyGoals).where(eq(dailyGoals.userId, userId)).limit(1),
+        db.select().from(dailyGoals).where(eq(dailyGoals.userId, userId)).where(eq(dailyGoals.date, today)).limit(1),
       ]);
 
       const state = stateData[0];
