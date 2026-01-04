@@ -1,61 +1,12 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1764542435559,
-      "tag": "0000_sleepy_jazinda",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1764542549889,
-      "tag": "0001_overjoyed_doctor_doom",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1764545053460,
-      "tag": "0002_common_rictor",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1764546504931,
-      "tag": "0003_short_johnny_blaze",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1764547338236,
-      "tag": "0004_medical_living_tribunal",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1764548378214,
-      "tag": "0005_sweet_mephistopheles",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1764548795590,
-      "tag": "0006_mixed_ogun",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1764564348521,
-      "tag": "0007_white_forge",
+      "version": "7",
+      "when": 1767566194998,
+      "tag": "0000_rare_ezekiel",
       "breakpoints": true
     }
   ]
