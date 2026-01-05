@@ -488,10 +488,10 @@ export default function Home() {
                         onClick={() => {
                           // Save quiz to database
                           saveOnboardingMutation.mutate({
-                            whatsWorking: "",
-                            currentSelf: "",
-                            futureSelf: quizName,
-                            supportNeeds: [quizData.guidanceStyle, quizData.presenceLevel],
+                            whatsWorking: "Initial setup completed",
+                            currentSelf: "Getting started with Mira",
+                            futureSelf: quizName || "User",
+                            supportNeeds: [quizData.guidanceStyle, quizData.presenceLevel].filter(Boolean),
                             tonePreference: quizData.tonePreference,
                             shutdownPreference: quizData.shutdownPreference,
                             pattern: null,
