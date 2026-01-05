@@ -271,12 +271,22 @@ export default function Home() {
             Mira.
           </span>
           <div className="flex gap-2 items-center">
-            <button
-              onClick={() => window.location.href = getLoginUrl()}
-              className="text-[10px] font-bold font-sans uppercase tracking-[0.2em] px-5 py-2.5 rounded-full border border-purple-200 bg-purple-50/40 hover:bg-purple-100/60 text-purple-700 transition-all shadow-sm backdrop-blur-sm"
-            >
-              Login
-            </button>
+            {!user && (
+              <button
+                onClick={() => window.location.href = getLoginUrl()}
+                className="text-[10px] font-bold font-sans uppercase tracking-[0.2em] px-5 py-2.5 rounded-full border border-purple-200 bg-purple-50/40 hover:bg-purple-100/60 text-purple-700 transition-all shadow-sm backdrop-blur-sm"
+              >
+                Login
+              </button>
+            )}
+            {user && (
+              <a
+                href="/dashboard"
+                className="text-[10px] font-bold font-sans uppercase tracking-[0.2em] px-5 py-2.5 rounded-full border border-purple-200 bg-purple-50/40 hover:bg-purple-100/60 text-purple-700 transition-all shadow-sm backdrop-blur-sm"
+              >
+                Dashboard
+              </a>
+            )}
             <button
               onClick={() => setShowWaitlist(true)}
               className="text-[10px] font-bold font-sans uppercase tracking-[0.2em] px-5 py-2.5 rounded-full border border-gray-200 bg-white/40 hover:bg-white text-mira-text transition-all shadow-sm backdrop-blur-sm"
