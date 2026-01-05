@@ -13,14 +13,16 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [quizName, setQuizName] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  
   const [quizData, setQuizData] = useState({
-    whatsWorking: "",
-    currentSelf: "",
-    futureSelf: "",
-    supportNeeds: [] as string[],
     tonePreference: "",
     shutdownPreference: "",
-    pattern: null as string | null,
+    guidanceStyle: "",
+    presenceLevel: "",
   });
 
   // Check if user has completed onboarding
@@ -73,6 +75,44 @@ export default function Home() {
 
   const nextQuiz = () => {
     setQuizStep(quizStep + 1);
+  };
+
+  const startRecording = async () => {
+    try {
+      setError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        // For now, just log - voice transcription can be added later
+        console.log('Audio recorded:', audioBlob);
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      setError('Could not access microphone. Please allow microphone permissions in your browser settings.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
   };
 
   const handleJoinWaitlist = (e: React.FormEvent) => {
@@ -211,7 +251,7 @@ export default function Home() {
                 {quizStep === 0 ? "" : "Calibration"}
               </span>
               <span className="text-[9px] font-bold uppercase tracking-widest">
-                {quizStep > 0 && quizStep < 8 ? `Step ${quizStep}/7` : ""}
+                {quizStep > 0 && quizStep < 6 ? `Step ${quizStep}/5` : ""}
               </span>
             </div>
 
@@ -283,261 +323,158 @@ export default function Home() {
               </div>
             )}
 
-            {/* QUIZ FLOW - Inside the crystal */}
+            {/* QUIZ FLOW - ORIGINAL APPROVED QUESTIONS */}
             {quizStep > 0 && (
               <div className="flex-1 flex flex-col justify-center items-center relative">
                 <div className="overflow-y-auto max-h-[400px] w-full px-1 py-2 no-scrollbar mt-4">
-                  {/* Step 1: Name */}
+                  
+                  {/* Q1: Name */}
                   {quizStep === 1 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <div className="mb-6 w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-100 to-pink-100 flex items-center justify-center text-3xl font-serif italic text-purple-600 shadow-lg">
-                        M.
-                      </div>
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        What should I call you?
+                    <div className="animate-fade-in-up">
+                      <h3 className="font-serif text-2xl mb-6 leading-tight text-gray-900">
+                        First — what should I call you?
                       </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        Just your first name is fine.
-                      </p>
-                      <input
-                        type="text"
-                        value={quizName}
-                        onChange={(e) => setQuizName(e.target.value)}
-                        placeholder="Your name"
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors shadow-sm"
-                      />
-                      <button
-                        onClick={nextQuiz}
-                        disabled={!quizName.trim()}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  )}
 
-                  {/* Step 2: What's working */}
-                  {quizStep === 2 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        What's working right now?
-                      </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        What parts of your life feel aligned, even if small?
-                      </p>
-                      <textarea
-                        value={quizData.whatsWorking}
-                        onChange={(e) =>
-                          setQuizData({ ...quizData, whatsWorking: e.target.value })
-                        }
-                        placeholder="I've been consistent with morning walks..."
-                        rows={4}
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none shadow-sm"
-                      />
-                      <button
-                        onClick={nextQuiz}
-                        disabled={!quizData.whatsWorking.trim()}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Step 3: Current self */}
-                  {quizStep === 3 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        How would you describe yourself right now?
-                      </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        Your current state, mood, or phase of life.
-                      </p>
-                      <textarea
-                        value={quizData.currentSelf}
-                        onChange={(e) =>
-                          setQuizData({ ...quizData, currentSelf: e.target.value })
-                        }
-                        placeholder="I'm in transition, feeling a bit scattered..."
-                        rows={4}
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none shadow-sm"
-                      />
-                      <button
-                        onClick={nextQuiz}
-                        disabled={!quizData.currentSelf.trim()}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Step 4: Future self */}
-                  {quizStep === 4 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        Who are you becoming?
-                      </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        The version of you that feels most aligned.
-                      </p>
-                      <textarea
-                        value={quizData.futureSelf}
-                        onChange={(e) =>
-                          setQuizData({ ...quizData, futureSelf: e.target.value })
-                        }
-                        placeholder="Someone more grounded, creative, present..."
-                        rows={4}
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none shadow-sm"
-                      />
-                      <button
-                        onClick={nextQuiz}
-                        disabled={!quizData.futureSelf.trim()}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Step 5: Support needs */}
-                  {quizStep === 5 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        What kind of support helps you most?
-                      </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        Select all that resonate.
-                      </p>
-                      <div className="space-y-3 mb-6">
-                        {[
-                          "Gentle reminders",
-                          "Reflective questions",
-                          "Encouragement",
-                          "Accountability",
-                          "Space to think",
-                        ].map((need) => (
-                          <button
-                            key={need}
-                            onClick={() => {
-                              const current = quizData.supportNeeds;
-                              if (current.includes(need)) {
-                                setQuizData({
-                                  ...quizData,
-                                  supportNeeds: current.filter((n) => n !== need),
-                                });
-                              } else {
-                                setQuizData({
-                                  ...quizData,
-                                  supportNeeds: [...current, need],
-                                });
-                              }
-                            }}
-                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all shadow-sm ${
-                              quizData.supportNeeds.includes(need)
-                                ? "bg-purple-100 border-2 border-purple-400 text-purple-900"
-                                : "bg-white/60 border border-gray-200 text-gray-700 hover:border-purple-300"
-                            }`}
+                      <div className="relative w-full mb-6">
+                        <input
+                          type="text"
+                          placeholder="Your name..."
+                          value={quizName}
+                          onChange={(e) => setQuizName(e.target.value)}
+                          className="w-full p-4 pr-12 rounded-xl bg-white/60 border border-gray-200 text-lg font-serif text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors shadow-sm"
+                        />
+                        <button
+                          onClick={isRecording ? stopRecording : startRecording}
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 transition-colors ${
+                            isRecording
+                              ? "text-pink-500 animate-pulse bg-pink-50"
+                              : "text-gray-400 hover:text-purple-500"
+                          }`}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="w-5 h-5"
                           >
-                            {need}
-                          </button>
-                        ))}
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 1.5a3 3 0 00-3 3v4.5a3 3 0 006 0v-4.5a3 3 0 00-3-3z"
+                            />
+                          </svg>
+                        </button>
                       </div>
+
                       <button
                         onClick={nextQuiz}
-                        disabled={quizData.supportNeeds.length === 0}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg"
                       >
-                        Continue
+                        Next
                       </button>
                     </div>
                   )}
 
-                  {/* Step 6: Tone preference */}
+                  {/* Q2: Tone */}
+                  {quizStep === 2 && (
+                    <div className="animate-fade-in-up">
+                      <h3 className="font-serif text-2xl mb-6 leading-tight text-gray-900">
+                        When we talk, which of these sounds most like what you
+                        want?
+                      </h3>
+                      <div className="space-y-3">
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, tonePreference: "Speak to me like a steady, calm presence." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Speak to me like a steady, calm presence."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, tonePreference: "Speak to me in a warm, friendly way." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Speak to me in a warm, friendly way."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, tonePreference: "Speak to me simply and directly. No fluff." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Speak to me simply and directly. No fluff."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, tonePreference: "Start neutral and adjust based on how I'm doing." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Start neutral and adjust based on how I'm doing."
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Q3: Shutdown */}
+                  {quizStep === 3 && (
+                    <div className="animate-fade-in-up">
+                      <h3 className="font-serif text-2xl mb-6 leading-tight text-gray-900">
+                        When you've checked out or shut down, what's actually
+                        most helpful?
+                      </h3>
+                      <div className="space-y-3">
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, shutdownPreference: "Give me space — I'll come back when I'm ready." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Give me space — I'll come back when I'm ready."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, shutdownPreference: "Check in softly, nothing heavy." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Check in softly, nothing heavy."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, shutdownPreference: "Nudge me gently back on track." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Nudge me gently back on track."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, shutdownPreference: "Call me out kindly — I respond to honesty." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Call me out kindly — I respond to honesty."
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Q4: Guidance */}
+                  {quizStep === 4 && (
+                    <div className="animate-fade-in-up">
+                      <h3 className="font-serif text-2xl mb-6 leading-tight text-gray-900">
+                        When you need help, what style of guidance works best?
+                      </h3>
+                      <div className="space-y-3">
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, guidanceStyle: "Give me simple, clear steps." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Give me simple, clear steps."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, guidanceStyle: "Offer a few options and let me choose." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Offer a few options and let me choose."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, guidanceStyle: "Handle what you can for me and show me the result." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Handle what you can for me and show me the result."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, guidanceStyle: "Keep it flexible and adjust in the moment." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Keep it flexible and adjust in the moment."
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Q5: Presence */}
+                  {quizStep === 5 && (
+                    <div className="animate-fade-in-up">
+                      <h3 className="font-serif text-2xl mb-6 leading-tight text-gray-900">
+                        Day to day, how present do you want Mira to be?
+                      </h3>
+                      <div className="space-y-3">
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, presenceLevel: "Only speak when I ask." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Only speak when I ask."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, presenceLevel: "Light check-ins here and there." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Light check-ins here and there."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, presenceLevel: "More regular support to keep me moving." })); nextQuiz(); }} className="w-full btn-glass">
+                          "More regular support to keep me moving."
+                        </button>
+                        <button onClick={() => { setQuizData(prev => ({ ...prev, presenceLevel: "Stay close and help me stay aligned." })); nextQuiz(); }} className="w-full btn-glass">
+                          "Stay close and help me stay aligned."
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* DONE */}
                   {quizStep === 6 && (
                     <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        How should I sound?
-                      </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        Choose the tone that feels right.
-                      </p>
-                      <div className="space-y-3 mb-6">
-                        {[
-                          { value: "warm", label: "Warm & nurturing" },
-                          { value: "direct", label: "Direct & clear" },
-                          { value: "poetic", label: "Poetic & reflective" },
-                          { value: "balanced", label: "Balanced & adaptive" },
-                        ].map((tone) => (
-                          <button
-                            key={tone.value}
-                            onClick={() =>
-                              setQuizData({ ...quizData, tonePreference: tone.value })
-                            }
-                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all shadow-sm ${
-                              quizData.tonePreference === tone.value
-                                ? "bg-purple-100 border-2 border-purple-400 text-purple-900"
-                                : "bg-white/60 border border-gray-200 text-gray-700 hover:border-purple-300"
-                            }`}
-                          >
-                            {tone.label}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        onClick={nextQuiz}
-                        disabled={!quizData.tonePreference}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Step 7: Shutdown preference */}
-                  {quizStep === 7 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
-                        When you need to disconnect, should I...
-                      </h3>
-                      <p className="font-sans text-sm text-gray-500 mb-8 leading-relaxed">
-                        How Mira responds when you step away.
-                      </p>
-                      <div className="space-y-3 mb-6">
-                        {[
-                          { value: "silent", label: "Go silent until you return" },
-                          { value: "gentle", label: "Send a gentle check-in" },
-                          { value: "respect", label: "Respect your space completely" },
-                        ].map((pref) => (
-                          <button
-                            key={pref.value}
-                            onClick={() =>
-                              setQuizData({ ...quizData, shutdownPreference: pref.value })
-                            }
-                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all shadow-sm ${
-                              quizData.shutdownPreference === pref.value
-                                ? "bg-purple-100 border-2 border-purple-400 text-purple-900"
-                                : "bg-white/60 border border-gray-200 text-gray-700 hover:border-purple-300"
-                            }`}
-                          >
-                            {pref.label}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => setQuizStep(8)}
-                        disabled={!quizData.shutdownPreference}
-                        className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Step 8: Completion */}
-                  {quizStep === 8 && (
-                    <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <div className="mb-6 w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-100 to-pink-100 flex items-center justify-center text-3xl text-purple-600 shadow-lg">
+                      <div className="mb-6 w-20 h-20 mx-auto rounded-full bg-gray-900 flex items-center justify-center text-white text-3xl shadow-xl animate-bounce">
                         ✓
                       </div>
                       <h3 className="font-serif text-3xl mb-4 text-gray-900">
@@ -551,13 +488,13 @@ export default function Home() {
                         onClick={() => {
                           // Save quiz to database
                           saveOnboardingMutation.mutate({
-                            whatsWorking: quizData.whatsWorking,
-                            currentSelf: quizData.currentSelf,
+                            whatsWorking: "",
+                            currentSelf: "",
                             futureSelf: quizName,
-                            supportNeeds: quizData.supportNeeds,
+                            supportNeeds: [quizData.guidanceStyle, quizData.presenceLevel],
                             tonePreference: quizData.tonePreference,
                             shutdownPreference: quizData.shutdownPreference,
-                            pattern: quizData.pattern,
+                            pattern: null,
                           });
                         }}
                         className="btn-connect w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg"
