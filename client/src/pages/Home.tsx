@@ -113,7 +113,7 @@ export default function Home() {
         ></div>
       </div>
 
-      {/* NAV - Hidden on onboarding gate */}
+      {/* NAV - Hidden when user is logged in (on onboarding gate) */}
       {!user && (
         <nav
           className={`fixed top-0 w-full z-50 transition-all duration-700 ${
@@ -151,7 +151,7 @@ export default function Home() {
           </p>
         </section>
 
-        {/* SINGLE CTA - Let's Begin */}
+        {/* SINGLE CTA - Let's Begin (only show when quiz hasn't started) */}
         {quizStep === 0 && (
           <div
             className="flex flex-col items-center gap-4 mb-10 animate-fade-in-up"
@@ -189,36 +189,108 @@ export default function Home() {
           </div>
         )}
 
-        {/* THE LIVING OBJECT - QUIZ FLOW */}
-        {quizStep > 0 && (
-          <div className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[5/6] mira-crystal animate-float">
-            {/* Reflection Shine */}
-            <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/80 via-white/10 to-transparent pointer-events-none"></div>
+        {/* THE LIVING OBJECT - Enhanced with dormant state and quiz */}
+        <div className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[5/6] mira-crystal animate-float">
+          {/* Reflection Shine */}
+          <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/80 via-white/10 to-transparent pointer-events-none"></div>
 
-            {/* Hardware Status Light */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-12 h-1 bg-black/5 rounded-full overflow-hidden z-20">
-              <div className="h-full bg-gradient-to-r from-purple-400 to-pink-400 w-full animate-pulse opacity-80"></div>
+          {/* Hardware Status Light */}
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-12 h-1 bg-black/5 rounded-full overflow-hidden z-20">
+            <div className="h-full bg-gradient-to-r from-purple-400 to-pink-400 w-full animate-pulse opacity-80"></div>
+          </div>
+
+          {/* CONTENT LAYER */}
+          <div className="absolute inset-0 p-8 flex flex-col justify-between z-10 text-mira-text pointer-events-auto">
+            {/* Minimal Header */}
+            <div
+              className={`flex justify-between items-start pt-2 transition-opacity duration-700 ${
+                quizStep === 0 ? "opacity-0" : "opacity-40"
+              }`}
+            >
+              <span className="text-[9px] font-bold uppercase tracking-widest">
+                {quizStep === 0 ? "" : "Calibration"}
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">
+                {quizStep > 0 && quizStep < 8 ? `Step ${quizStep}/7` : ""}
+              </span>
             </div>
 
-            {/* CONTENT LAYER */}
-            <div className="absolute inset-0 p-8 flex flex-col justify-between z-10 text-mira-text pointer-events-auto">
-              {/* Minimal Header */}
-              <div className="flex justify-between items-start pt-2 opacity-40">
-                <span className="text-[9px] font-bold uppercase tracking-widest">
-                  Calibration
-                </span>
-                <span className="text-[9px] font-bold uppercase tracking-widest">
-                  Step {quizStep}/7
-                </span>
-              </div>
+            {/* DORMANT STATE - Beautiful animation when quiz hasn't started */}
+            {quizStep === 0 && (
+              <div className="flex-1 flex flex-col justify-center items-center text-center w-full">
+                <div className="absolute inset-0 flex flex-col justify-center items-center px-6 transition-all duration-1000">
+                  <div className="relative w-64 h-64 flex justify-center items-center">
+                    {/* Vivid Soul - Enhanced gradient animation */}
+                    <div className="absolute inset-0 vivid-soul rounded-full animate-rotate-slow"></div>
 
-              {/* QUIZ FLOW */}
+                    {/* Geometric Rings - Multiple layers */}
+                    <div className="absolute inset-4 border border-white/40 rounded-full animate-pulse-ring"></div>
+                    <div
+                      className="absolute inset-12 border border-white/20 rounded-full animate-rotate-slow"
+                      style={{ animationDirection: "reverse" }}
+                    ></div>
+                    <div
+                      className="absolute inset-8 border border-white/10 rounded-full animate-pulse-ring"
+                      style={{ animationDelay: "1s" }}
+                    ></div>
+
+                    {/* The Infinity Path M - Enhanced */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32">
+                      <svg
+                        width="120"
+                        height="120"
+                        viewBox="0 0 100 100"
+                        fill="none"
+                      >
+                        <defs>
+                          <linearGradient
+                            id="whiteGrad"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="0%"
+                          >
+                            <stop offset="0%" stopColor="white" stopOpacity="0" />
+                            <stop offset="100%" stopColor="white" />
+                          </linearGradient>
+                        </defs>
+
+                        <path
+                          d="M 25 80 L 25 20 L 50 50 L 75 20 L 75 80"
+                          stroke="url(#whiteGrad)"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          fill="none"
+                          className="path-draw"
+                        />
+
+                        <circle
+                          r="3.5"
+                          fill="white"
+                          filter="drop-shadow(0 0 4px white)"
+                          className="path-particle"
+                        ></circle>
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  {/* Text below the circle - Enhanced */}
+                  <p className="font-serif text-lg text-mira-text text-center mt-8 animate-pulse">
+                    Present. Listening. Ready.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* QUIZ FLOW - Inside the crystal */}
+            {quizStep > 0 && (
               <div className="flex-1 flex flex-col justify-center items-center relative">
                 <div className="overflow-y-auto max-h-[400px] w-full px-1 py-2 no-scrollbar mt-4">
                   {/* Step 1: Name */}
                   {quizStep === 1 && (
                     <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <div className="mb-6 w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-100 to-pink-100 flex items-center justify-center text-3xl font-serif italic text-purple-600">
+                      <div className="mb-6 w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-100 to-pink-100 flex items-center justify-center text-3xl font-serif italic text-purple-600 shadow-lg">
                         M.
                       </div>
                       <h3 className="font-serif text-3xl mb-4 leading-tight text-gray-900">
@@ -232,7 +304,7 @@ export default function Home() {
                         value={quizName}
                         onChange={(e) => setQuizName(e.target.value)}
                         placeholder="Your name"
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors"
+                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors shadow-sm"
                       />
                       <button
                         onClick={nextQuiz}
@@ -260,7 +332,7 @@ export default function Home() {
                         }
                         placeholder="I've been consistent with morning walks..."
                         rows={4}
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none"
+                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none shadow-sm"
                       />
                       <button
                         onClick={nextQuiz}
@@ -288,7 +360,7 @@ export default function Home() {
                         }
                         placeholder="I'm in transition, feeling a bit scattered..."
                         rows={4}
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none"
+                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none shadow-sm"
                       />
                       <button
                         onClick={nextQuiz}
@@ -316,7 +388,7 @@ export default function Home() {
                         }
                         placeholder="Someone more grounded, creative, present..."
                         rows={4}
-                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none"
+                        className="w-full p-4 mb-6 rounded-xl bg-white/60 border border-gray-200 text-base font-sans text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none shadow-sm"
                       />
                       <button
                         onClick={nextQuiz}
@@ -361,7 +433,7 @@ export default function Home() {
                                 });
                               }
                             }}
-                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all ${
+                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all shadow-sm ${
                               quizData.supportNeeds.includes(need)
                                 ? "bg-purple-100 border-2 border-purple-400 text-purple-900"
                                 : "bg-white/60 border border-gray-200 text-gray-700 hover:border-purple-300"
@@ -402,7 +474,7 @@ export default function Home() {
                             onClick={() =>
                               setQuizData({ ...quizData, tonePreference: tone.value })
                             }
-                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all ${
+                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all shadow-sm ${
                               quizData.tonePreference === tone.value
                                 ? "bg-purple-100 border-2 border-purple-400 text-purple-900"
                                 : "bg-white/60 border border-gray-200 text-gray-700 hover:border-purple-300"
@@ -442,7 +514,7 @@ export default function Home() {
                             onClick={() =>
                               setQuizData({ ...quizData, shutdownPreference: pref.value })
                             }
-                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all ${
+                            className={`w-full p-4 rounded-xl text-left font-sans text-sm transition-all shadow-sm ${
                               quizData.shutdownPreference === pref.value
                                 ? "bg-purple-100 border-2 border-purple-400 text-purple-900"
                                 : "bg-white/60 border border-gray-200 text-gray-700 hover:border-purple-300"
@@ -465,13 +537,13 @@ export default function Home() {
                   {/* Step 8: Completion */}
                   {quizStep === 8 && (
                     <div className="flex flex-col justify-center h-full text-center px-4 animate-fade-in-up">
-                      <div className="mb-6 w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-100 to-pink-100 flex items-center justify-center text-3xl text-purple-600">
+                      <div className="mb-6 w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-100 to-pink-100 flex items-center justify-center text-3xl text-purple-600 shadow-lg">
                         ✓
                       </div>
                       <h3 className="font-serif text-3xl mb-4 text-gray-900">
                         That's all I need.
                       </h3>
-                      <p className="font-sans text-sm font-medium text-gray-500 mb-8 max-w-[80%] mx-auto">
+                      <p className="font-sans text-sm font-medium text-gray-500 mb-8 max-w-[80%] mx-auto leading-relaxed">
                         I'll start from this and keep adjusting as I learn you.
                         Whenever you're ready, I'm here.
                       </p>
@@ -497,9 +569,9 @@ export default function Home() {
                   )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* FOOTER CTA - Only show when not in quiz */}
         {quizStep === 0 && (
