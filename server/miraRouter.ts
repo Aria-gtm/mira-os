@@ -421,6 +421,23 @@ export const miraRouter = router({
   // ONBOARDING (Keep existing)
   // ============================================
 
+  checkOnboarding: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+
+    const userId = ctx.user.id;
+
+    const profile = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1);
+
+    return {
+      hasCompletedOnboarding: profile.length > 0 && !!profile[0].futureSelf,
+    };
+  }),
+
   saveOnboarding: protectedProcedure
     .input(
       z.object({
