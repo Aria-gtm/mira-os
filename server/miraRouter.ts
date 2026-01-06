@@ -454,6 +454,23 @@ export const miraRouter = router({
       try {
         console.log('[saveOnboarding] Starting with input:', JSON.stringify(input, null, 2));
         
+        // Map quiz answers to database enum values
+        const mapCommunicationStyle = (answer: string): string => {
+          if (answer.includes('steady, calm')) return 'gentle';
+          if (answer.includes('warm, friendly')) return 'warm';
+          if (answer.includes('simply and directly')) return 'direct';
+          if (answer.includes('neutral and adjust')) return 'adaptive';
+          return 'adaptive';
+        };
+        
+        const mapCallOutPreference = (answer: string): string => {
+          if (answer.includes('Give me space')) return 'user-initiated';
+          if (answer.includes('Check in softly')) return 'gentle';
+          if (answer.includes('Nudge me gently')) return 'proactive';
+          if (answer.includes('Call me out kindly')) return 'auto';
+          return 'user-initiated';
+        };
+        
         const db = await getDb();
         if (!db) throw new Error("Database not available");
 
@@ -477,8 +494,8 @@ export const miraRouter = router({
         overwhelmSignals: "To be discovered through use",
         spiralTime: "evening",
         personalityMode: "adaptive",
-        communicationStyle: input.tonePreference,
-        callOutPreference: input.shutdownPreference,
+        communicationStyle: mapCommunicationStyle(input.tonePreference),
+        callOutPreference: mapCallOutPreference(input.shutdownPreference),
         comfortStyle: "Gentle support and understanding",
         groundingMethods: JSON.stringify([]),
         supportIntensity: "light",
