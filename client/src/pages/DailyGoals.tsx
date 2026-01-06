@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Mic, MicOff } from "lucide-react";
 
 export default function DailyGoals() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -14,6 +15,11 @@ export default function DailyGoals() {
   const [personalGoal, setPersonalGoal] = useState("");
   const [professionalGoal, setProfessionalGoal] = useState("");
   const [growthGoal, setGrowthGoal] = useState("");
+  
+  // Voice recording state
+  const [recordingField, setRecordingField] = useState<string | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   
   // Evening reflection state
   const [personalProgress, setPersonalProgress] = useState("");
@@ -100,6 +106,45 @@ export default function DailyGoals() {
     });
   };
 
+  const startRecording = async (field: string) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        
+        // TODO: Send to transcription API
+        // For now, just show a message
+        toast.info("Voice transcription coming soon!");
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setRecordingField(field);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast.error('Could not access microphone. Please check permissions.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recordingField) {
+      mediaRecorderRef.current.stop();
+      setRecordingField(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FFFCF9]">
@@ -159,36 +204,78 @@ export default function DailyGoals() {
                 <label className="block text-sm font-medium mb-2">
                   Personal Goal
                 </label>
-                <Textarea
-                  placeholder="Something for your well-being, relationships, or self-care"
-                  value={personalGoal}
-                  onChange={(e) => setPersonalGoal(e.target.value)}
-                  rows={3}
-                />
+                <div className="relative">
+                  <Textarea
+                    placeholder="Something for your well-being, relationships, or self-care"
+                    value={personalGoal}
+                    onChange={(e) => setPersonalGoal(e.target.value)}
+                    rows={3}
+                    className="pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => recordingField === 'personal' ? stopRecording() : startRecording('personal')}
+                    className="absolute right-3 top-3 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {recordingField === 'personal' ? (
+                      <MicOff className="w-5 h-5 text-red-500" />
+                    ) : (
+                      <Mic className="w-5 h-5 text-gray-600" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Professional Goal
                 </label>
-                <Textarea
-                  placeholder="Work, business, or career progress"
-                  value={professionalGoal}
-                  onChange={(e) => setProfessionalGoal(e.target.value)}
-                  rows={3}
-                />
+                <div className="relative">
+                  <Textarea
+                    placeholder="Work, business, or career progress"
+                    value={professionalGoal}
+                    onChange={(e) => setProfessionalGoal(e.target.value)}
+                    rows={3}
+                    className="pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => recordingField === 'professional' ? stopRecording() : startRecording('professional')}
+                    className="absolute right-3 top-3 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {recordingField === 'professional' ? (
+                      <MicOff className="w-5 h-5 text-red-500" />
+                    ) : (
+                      <Mic className="w-5 h-5 text-gray-600" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Growth/Health Goal
                 </label>
-                <Textarea
-                  placeholder="Learning, fitness, mindfulness, or personal development"
-                  value={growthGoal}
-                  onChange={(e) => setGrowthGoal(e.target.value)}
-                  rows={3}
-                />
+                <div className="relative">
+                  <Textarea
+                    placeholder="Learning, fitness, mindfulness, or personal development"
+                    value={growthGoal}
+                    onChange={(e) => setGrowthGoal(e.target.value)}
+                    rows={3}
+                    className="pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => recordingField === 'growth' ? stopRecording() : startRecording('growth')}
+                    className="absolute right-3 top-3 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {recordingField === 'growth' ? (
+                      <MicOff className="w-5 h-5 text-red-500" />
+                    ) : (
+                      <Mic className="w-5 h-5 text-gray-600" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <Button
