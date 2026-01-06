@@ -451,18 +451,24 @@ export const miraRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      try {
+        console.log('[saveOnboarding] Starting with input:', JSON.stringify(input, null, 2));
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
 
-      const userId = ctx.user.id;
+        const userId = ctx.user.id;
+        console.log('[saveOnboarding] User ID:', userId);
 
-      const existing = await db
-        .select()
-        .from(userProfiles)
-        .where(eq(userProfiles.userId, userId))
-        .limit(1);
+        const existing = await db
+          .select()
+          .from(userProfiles)
+          .where(eq(userProfiles.userId, userId))
+          .limit(1);
+        
+        console.log('[saveOnboarding] Existing profile found:', existing.length > 0);
 
-      const profileData = {
+        const profileData = {
         userId,
         futureSelf: input.futureSelf,
         goals: JSON.stringify(input.supportNeeds),
@@ -490,15 +496,25 @@ export const miraRouter = router({
         }),
       };
 
-      if (existing.length > 0) {
-        await db
-          .update(userProfiles)
-          .set(profileData)
-          .where(eq(userProfiles.userId, userId));
-      } else {
-        await db.insert(userProfiles).values(profileData);
-      }
+        console.log('[saveOnboarding] Profile data to save:', JSON.stringify(profileData, null, 2));
 
-      return { success: true };
+        if (existing.length > 0) {
+          console.log('[saveOnboarding] Updating existing profile');
+          await db
+            .update(userProfiles)
+            .set(profileData)
+            .where(eq(userProfiles.userId, userId));
+        } else {
+          console.log('[saveOnboarding] Inserting new profile');
+          await db.insert(userProfiles).values(profileData);
+        }
+
+        console.log('[saveOnboarding] Success!');
+        return { success: true };
+      } catch (error) {
+        console.error('[saveOnboarding] ERROR:', error);
+        console.error('[saveOnboarding] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        throw error;
+      }
     }),
 });
